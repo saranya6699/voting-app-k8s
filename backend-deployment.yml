@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: voting-app
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-dep
+        image: cloudacademydevops/api:v3
+        imagePullPolicy: Always
+        env:
+          - name: mongo-conn
+            value: mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/langdb?replicaSet=rs0
+          - name: mongo_username
+            valueFrom:
+              SecretKeyRef:
+                name: mongo-secret
+                key: username
+          - name: mongo_password
+            valueFrom:
+              SecretKeyRef:
+                name: mongo-secret
+                key: password
+        ports:
+        - containerPort: 80
+  strategy:
+   type: RollingUpdate
+   rollingUpdate:
+     maxUnavailable: 1

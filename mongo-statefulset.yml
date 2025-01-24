@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-db
+  namespace: voting-app
+spec:
+  selector:
+    matchLabels:
+      app: mongo-db
+  serviceName: mongo
+  replicas: 3 
+  minReadySeconds: 10 
+  template:
+    metadata:
+      labels:
+        app: mongo-db
+        env: demo
+        replicaset: rs0.main
+    spec:
+      affinity:
+        podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: replicaset
+                operator: In
+                values:
+                - rs0.main
+          topologyKey: topology.kubernetes.io/hostname
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mongo-db
+        image: mongo:4.2
+        command:
+            - "numactl"
+            - "--interleave=all"
+            - "mongod"
+            - "--wiredTigerCacheSizeGB"
+            - "0.1"
+            - "--bind_ip"
+            - "0.0.0.0"
+            - "--replSet"
+            - "rs0"
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongodb-persistent-storage-claim
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-persistent-storage-claim
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: gp2                                                     
+      resources:
+        requests:
+          storage: 0.5Gi
