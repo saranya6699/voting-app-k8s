@@ -20,20 +20,20 @@ spec:
         image: cloudacademydevops/api:v3
         imagePullPolicy: Always
         env:
-          - name: mongo-conn
+          - name: MONGO_CONN_STR
             value: mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/langdb?replicaSet=rs0
-          - name: mongo_username
+          - name: MONGO_USERNAME
             valueFrom:
-              SecretKeyRef:
+              secretKeyRef:
                 name: mongo-secret
                 key: username
-          - name: mongo_password
+          - name: MONGO_PASSWORD
             valueFrom:
-              SecretKeyRef:
+              secretKeyRef:
                 name: mongo-secret
                 key: password
         ports:
-        - containerPort: 80
+        - containerPort: 8080
   strategy:
    type: RollingUpdate
    rollingUpdate:
