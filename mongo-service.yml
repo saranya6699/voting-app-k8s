@@ -4,7 +4,7 @@ metadata:
   name: mongo-service
   namespace: voting-app
   labels:
-    app: mongo-service
+    app: mongo-db
 spec:
   clusterIP: None  # Headless service
   selector:
